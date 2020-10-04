@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.sd.bolsaApi.dto.EmpresaDTO;
+
 @XmlRootElement
 public class Empresa implements Serializable{
 	
@@ -37,10 +39,34 @@ public class Empresa implements Serializable{
 		valorEmpresa = 0;
 	}
 	
+	public Empresa(EmpresaDTO dto, int listSize) {
+		this.id = UUID.randomUUID();
+		
+		this.nome = dto.getNome();
+		
+		this.codigo = nome.substring(0, 3).toUpperCase();
+		this.codigo = this.codigo +"-"+ listSize;
+		
+		this.quantidadeTotalAcoes = dto.getQuantidadeTotalAcoes();
+		
+		if(acoes == null) {
+			this.acoes = new ArrayList<Acao>();
+		}
+		
+		valorEmpresa = 0;
+	}
+	
 	public void gerarAcoes() {
 		for(int i=0; i<quantidadeTotalAcoes; i++) {
 			String codigo = this.codigo + "-" + i;
 			acoes.add(new Acao(codigo, 0, this));
+		}
+	}
+	
+	public void gerarAcoesComCliente(UUID idClienteDono) {
+		for(int i=0; i<quantidadeTotalAcoes; i++) {
+			String codigo = this.codigo + "-" + i;
+			acoes.add(new Acao(codigo, 0, this, idClienteDono));
 		}
 	}
 	

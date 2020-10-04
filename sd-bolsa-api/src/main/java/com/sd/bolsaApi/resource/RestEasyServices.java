@@ -13,6 +13,8 @@ public class RestEasyServices extends Application{
 	
 	public RestEasyServices(){
 		this.singletons.add(new HelloWorldResource());
+		this.singletons.add(new ClienteControleResource());
+		this.singletons.add(new EmpresaResource());
 	}
 	
 	@Override

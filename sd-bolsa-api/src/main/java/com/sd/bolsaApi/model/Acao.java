@@ -1,6 +1,7 @@
 package com.sd.bolsaApi.model;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -12,15 +13,15 @@ public class Acao implements Serializable{
 	private String codigo;
 	private double preco;
 	private double precoDeCompra;
-	Empresa empresa;
-	ClienteControle clienteDono;
+	private String codigoEmpresa;
+	UUID idClienteDono;
 	private boolean aVenda;
 	
 	public Acao (String codigo, double preco) {
 		this.codigo = codigo;
 		this.preco = preco;
 		this.precoDeCompra = 0;
-		this.clienteDono = null;
+		this.idClienteDono = null;
 		aVenda = false;
 	}
 	
@@ -28,8 +29,17 @@ public class Acao implements Serializable{
 		this.codigo = codigo;
 		this.preco = preco;
 		this.precoDeCompra = 0;
-		this.empresa = empresa;
-		this.clienteDono = null;
+		this.codigoEmpresa = empresa.getCodigo();
+		this.idClienteDono = null;
+		aVenda = false;
+	}
+	
+	public Acao (String codigo, double preco, Empresa empresa, UUID idClienteDono) {
+		this.codigo = codigo;
+		this.preco = preco;
+		this.precoDeCompra = 0;
+		this.codigoEmpresa = empresa.getCodigo();
+		this.idClienteDono = idClienteDono;
 		aVenda = false;
 	}
 	
@@ -57,16 +67,16 @@ public class Acao implements Serializable{
 		return this.precoDeCompra;
 	}
 
-	public ClienteControle getClienteDono() {
-		return clienteDono;
+	public UUID getIdClienteDono() {
+		return idClienteDono;
 	}
 
-	public void setClienteDono(ClienteControle clienteDono) {
-		this.clienteDono = clienteDono;
+	public void setIdClienteDono(UUID idClienteDono) {
+		this.idClienteDono = idClienteDono;
 	}
 
-	public Empresa getEmpresa() {
-		return empresa;
+	public String getCodigoEmpresa() {
+		return codigoEmpresa;
 	}
 
 	public boolean isaVenda() {
@@ -81,9 +91,9 @@ public class Acao implements Serializable{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((clienteDono == null) ? 0 : clienteDono.hashCode());
+		result = prime * result + ((idClienteDono == null) ? 0 : idClienteDono.hashCode());
 		result = prime * result + ((codigo == null) ? 0 : codigo.hashCode());
-		result = prime * result + ((empresa == null) ? 0 : empresa.hashCode());
+		result = prime * result + ((codigoEmpresa == null) ? 0 : codigoEmpresa.hashCode());
 		return result;
 	}
 
@@ -96,20 +106,20 @@ public class Acao implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		Acao other = (Acao) obj;
-		if (clienteDono == null) {
-			if (other.clienteDono != null)
+		if (idClienteDono == null) {
+			if (other.idClienteDono != null)
 				return false;
-		} else if (!clienteDono.equals(other.clienteDono))
+		} else if (!idClienteDono.equals(other.idClienteDono))
 			return false;
 		if (codigo == null) {
 			if (other.codigo != null)
 				return false;
 		} else if (!codigo.equals(other.codigo))
 			return false;
-		if (empresa == null) {
-			if (other.empresa != null)
+		if (codigoEmpresa == null) {
+			if (other.codigoEmpresa != null)
 				return false;
-		} else if (!empresa.equals(other.empresa))
+		} else if (!codigoEmpresa.equals(other.codigoEmpresa))
 			return false;
 		return true;
 	}
