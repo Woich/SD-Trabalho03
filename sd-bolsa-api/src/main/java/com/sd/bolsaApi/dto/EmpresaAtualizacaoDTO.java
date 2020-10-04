@@ -8,6 +8,13 @@ public class EmpresaAtualizacaoDTO {
 	private String codEmpresa;
 	private double valorNovo;
 	
+	public EmpresaAtualizacaoDTO(String codEmpresa, double valorNovo) {
+		
+		this.codEmpresa = codEmpresa;
+		this.valorNovo = valorNovo;
+		
+	}
+	
 	public String getCodEmpresa() {
 		return codEmpresa;
 	}

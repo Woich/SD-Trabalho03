@@ -38,18 +38,21 @@ public class EmpresaResource {
 		if(empresaDTO != null) {
 			
 			if(empresaDTO.getNome() == null) {
+				//Retorna um bad request caso o nome não tenha sido informado
 				return Response
 						.status(Status.BAD_REQUEST)
 						.entity(new String("Deve ser informado o nome da empresa"))
 						.type(MediaType.TEXT_PLAIN)
 						.build();
 			} else if(empresaDTO.getQuantidadeTotalAcoes() <= 0) {
+				//Retorna um bad request caso a quantidade de ações seja menor ou igual a zero
 				return Response
 						.status(Status.BAD_REQUEST)
 						.entity(new String("Deve ser informada a quantidade de ações da empresa"))
 						.type(MediaType.TEXT_PLAIN)
 						.build();
 			}else if(empresaDTO.getIdCliente() == null) {
+				//Retorna um bad request caso não possua um id do cliente que fez a requisição
 				return Response
 						.status(Status.BAD_REQUEST)
 						.entity(new String("Deve ser informado o cliente dono da empresa"))
@@ -73,16 +76,18 @@ public class EmpresaResource {
 			boolean empresaSalva = addEmpresa(novaEmpresa);
 			
 			if(empresaSalva) {
-				
+				//Tenta add as ações
 				boolean acoesSalvas = addListaAcoes(novaEmpresa.getAcoes());
 				
 				if(acoesSalvas) {
+					//Caso consiga criar a emrepsa e as ações retorna um CREATED
 					return Response
 							.status(Status.CREATED)
 							.entity(novaEmpresa)
 							.type(MediaType.APPLICATION_JSON)
 							.build();
 				}else {
+					//Caso não consiga criar as ações retorna um INTERNAL SERVER ERRO
 					return Response
 							.status(Status.INTERNAL_SERVER_ERROR)
 							.entity(new String("Erro ao registrar as ações!"))
@@ -91,6 +96,7 @@ public class EmpresaResource {
 				}
 				
 			}else {
+				//Caso não consiga criar a emrepsa retorna um INTERNAL SERVER ERRO
 				return Response
 						.status(Status.INTERNAL_SERVER_ERROR)
 						.entity(new String("Erro ao registrar a empresa!"))
@@ -98,7 +104,7 @@ public class EmpresaResource {
 						.build();
 			}
 		}
-		
+		//Retorna um bad request caso o DTO esteja vazio
 		return Response
 				.status(Status.BAD_REQUEST)
 				.entity(new String("Empresa informa inválida"))
@@ -113,7 +119,7 @@ public class EmpresaResource {
 		if(listaEmpresa == null) {
 			listaEmpresa = new ArrayList<Empresa>(0);
 		}
-		
+		//Retorna a lista de empresas
 		return Response.ok(listaEmpresa).build();
 		
 	}
@@ -127,6 +133,7 @@ public class EmpresaResource {
 			listaAcoes = new ArrayList<Acao>(0);
 		}
 		
+		//retorna a lista de ações
 		return Response.ok(listaAcoes).build();
 		
 	}
@@ -136,8 +143,10 @@ public class EmpresaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response findAcoesCliente(@PathParam("idCliente") UUID idCliente) {
 		
+		//Inicializa a lista
 		List<Acao> listaAcoesCliente = new ArrayList<Acao>();
 		
+		//Percorre todas as listas de ações buscando as que pertecem ao cliente en quesetão
 		for(Acao acao : listaAcoes) {
 			
 			if(acao.getIdClienteDono().equals(idCliente)) {
@@ -146,6 +155,7 @@ public class EmpresaResource {
 			
 		}
 		
+		//retorna a lista de ações criada
 		return Response.ok(listaAcoesCliente).build();
 		
 	}
@@ -155,6 +165,7 @@ public class EmpresaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public synchronized Response setValorizacaoEmpresas(@PathParam("valor") double valor) {
 		
+		//Percorre a lista atualizando os valores
 		for(Empresa empresa : listaEmpresa) {
 			
 			empresa.setValorEmpresa(empresa.getValorEmpresa() + valor);
@@ -169,6 +180,7 @@ public class EmpresaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public synchronized Response setDesvalorizacaoEmpresas(@PathParam("valor") double valor) {
 		
+		//Percorre a lista atualizando os valores
 		for(Empresa empresa : listaEmpresa) {
 			
 			empresa.setValorEmpresa(empresa.getValorEmpresa() - valor);
@@ -184,6 +196,7 @@ public class EmpresaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response atualizarEmpresa(EmpresaAtualizacaoDTO dto) {
 		
+		//Retorna um bad request em caso de não ter o código da empresa
 		if(dto.getCodEmpresa() == null) {
 			return Response
 					.status(Status.BAD_REQUEST)
@@ -192,11 +205,14 @@ public class EmpresaResource {
 					.build();
 		}
 		
+		//Tenta atualizar a empresa
 		boolean atualizouEmpresa = atualizarEmpresa(dto.getCodEmpresa(), dto.getValorNovo());
 		
 		if(atualizouEmpresa) {
+			//Caso consida retorna um ok
 			return Response.ok().build();
 		}else {
+			//Caso não, retorna um Internal Server Erro
 			return Response
 					.status(Status.INTERNAL_SERVER_ERROR)
 					.entity(new String("Erro ao atualizar empresa"))
@@ -212,12 +228,14 @@ public class EmpresaResource {
 	public Response atualizarAcao(AcaoAtualizacaoDTO dto) {
 		
 		if(dto.getCodAcao() == null) {
+			//Retorna um bad request caso não tenha uma ação informada
 			return Response
 					.status(Status.BAD_REQUEST)
 					.entity(new String("Deve ser informado o código da ação"))
 					.type(MediaType.TEXT_PLAIN)
 					.build();
 		}else if(dto.getIdNovoDono() == null) {
+			//Retorna um bad request caso não tenha um dono informado
 			return Response
 					.status(Status.BAD_REQUEST)
 					.entity(new String("Deve ser informado o id do dono da acao"))
@@ -225,11 +243,14 @@ public class EmpresaResource {
 					.build();
 		}
 		
+		//Tenta atualiza a ação
 		boolean atualizouAcao = atualizarAcao(dto.getCodAcao(), dto.getIdNovoDono(), dto.getValorCompra());
 		
 		if(atualizouAcao) {
+			//Caso consiga retorna OK
 			return Response.ok().build();
 		}else {
+			//Caso não consiga retorna INTERNAL SERVER ERROR
 			return Response
 					.status(Status.INTERNAL_SERVER_ERROR)
 					.entity(new String("Erro ao atualizar empresa"))
@@ -287,7 +308,7 @@ public class EmpresaResource {
 			Empresa empr = this.listaEmpresa.stream().filter(e -> e.getCodigo().equals(codEmpresa)).findAny().orElse(null); //busca a empresa informada
 			
 			if(empr != null) {
-				
+				//Caso exista a empresa, remove ela, atualiza os valores e add ela novamente
 				listaEmpresa.remove(empr);
 				
 				empr.setValorEmpresa(valorNovo);
@@ -308,10 +329,10 @@ public class EmpresaResource {
 	private synchronized boolean atualizarAcao(String codAcao, UUID idNovoDono,double valorCompra) {
 		try {
 			
-			Acao acao = this.listaAcoes.stream().filter(e -> e.getCodigo().equals(codAcao)).findAny().orElse(null); //busca a empresa informada
+			Acao acao = this.listaAcoes.stream().filter(e -> e.getCodigo().equals(codAcao)).findAny().orElse(null); //busca a ação informada
 			
 			if(acao != null) {
-				
+				//Caso exista a ação, remove ela, atualiza os valores e add ela novamente
 				listaAcoes.remove(acao);
 				
 				acao.setIdClienteDono(idNovoDono);

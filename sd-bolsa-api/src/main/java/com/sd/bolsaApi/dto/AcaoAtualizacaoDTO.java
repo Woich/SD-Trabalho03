@@ -11,6 +11,15 @@ public class AcaoAtualizacaoDTO {
 	UUID idNovoDono; 
 	double valorCompra;
 	
+	
+	public AcaoAtualizacaoDTO(String codAcao, UUID idNovoDono, double valorCompra) {
+		
+		this.codAcao = codAcao;
+		this.idNovoDono = idNovoDono;
+		this.valorCompra = valorCompra;
+		
+	}
+	
 	public String getCodAcao() {
 		return codAcao;
 	}
