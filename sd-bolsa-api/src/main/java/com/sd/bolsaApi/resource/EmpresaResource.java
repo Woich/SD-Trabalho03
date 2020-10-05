@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 import com.sd.bolsaApi.dto.AcaoAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaDTO;
+import com.sd.bolsaApi.dto.ListaAcoesDTO;
 import com.sd.bolsaApi.model.Acao;
 import com.sd.bolsaApi.model.Empresa;
 
@@ -144,13 +145,13 @@ public class EmpresaResource {
 	public Response findAcoesCliente(@PathParam("idCliente") UUID idCliente) {
 		
 		//Inicializa a lista
-		List<Acao> listaAcoesCliente = new ArrayList<Acao>();
+		ListaAcoesDTO listaAcoesCliente = new ListaAcoesDTO();
 		
 		//Percorre todas as listas de ações buscando as que pertecem ao cliente en quesetão
 		for(Acao acao : listaAcoes) {
 			
 			if(acao.getIdClienteDono().equals(idCliente)) {
-				listaAcoesCliente.add(acao);
+				listaAcoesCliente.addAcaoLista(acao);
 			}
 			
 		}
@@ -244,7 +245,7 @@ public class EmpresaResource {
 		}
 		
 		//Tenta atualiza a ação
-		boolean atualizouAcao = atualizarAcao(dto.getCodAcao(), dto.getIdNovoDono(), dto.getValorCompra());
+		boolean atualizouAcao = atualizarAcao(dto.getCodAcao(), dto.getIdNovoDono(), dto.getValorCompra(), dto.isaVenda());
 		
 		if(atualizouAcao) {
 			//Caso consiga retorna OK
@@ -326,7 +327,7 @@ public class EmpresaResource {
 		}
 	}
 	
-	private synchronized boolean atualizarAcao(String codAcao, UUID idNovoDono,double valorCompra) {
+	private synchronized boolean atualizarAcao(String codAcao, UUID idNovoDono,double valorCompra, boolean aVenda) {
 		try {
 			
 			Acao acao = this.listaAcoes.stream().filter(e -> e.getCodigo().equals(codAcao)).findAny().orElse(null); //busca a ação informada
@@ -338,6 +339,8 @@ public class EmpresaResource {
 				acao.setIdClienteDono(idNovoDono);
 				
 				acao.setPrecoDeCompra(valorCompra);
+				
+				acao.setaVenda(aVenda);
 				
 				listaAcoes.add(acao);
 				

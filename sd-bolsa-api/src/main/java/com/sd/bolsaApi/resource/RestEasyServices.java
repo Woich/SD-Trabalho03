@@ -15,6 +15,7 @@ public class RestEasyServices extends Application{
 		this.singletons.add(new HelloWorldResource());
 		this.singletons.add(new ClienteControleResource());
 		this.singletons.add(new EmpresaResource());
+		this.singletons.add(new OrdemResource());
 	}
 	
 	@Override

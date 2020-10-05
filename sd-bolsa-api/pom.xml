@@ -26,6 +26,13 @@
       <scope>test</scope>
     </dependency>
     
+    <!-- tratar json -->
+   	<dependency>
+	    <groupId>org.json</groupId>
+	    <artifactId>json</artifactId>
+	    <version>20200518</version>
+	</dependency>
+    
      <!-- Set up RESTEasy -->
      <dependency>
          <groupId>org.jboss.resteasy</groupId>

@@ -40,7 +40,7 @@ public class Acao implements Serializable{
 		this.precoDeCompra = 0;
 		this.codigoEmpresa = empresa.getCodigo();
 		this.idClienteDono = idClienteDono;
-		aVenda = false;
+		this.aVenda = false;
 	}
 	
 	public void setCodigo(String codigo) {
