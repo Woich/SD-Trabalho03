@@ -137,9 +137,11 @@ public class OrdemResource {
 					
 				}
 			}else {
-				//Gera a ordem de venda e salva ela
-				Ordem compra = new Ordem(dto.getIdCliente(), dto.getCodigoEmpresa(), dto.getValorOrdem(), dto.getPrazoMin());
-				registrarCompraAcao(compra);
+				for(int i=0; i < dto.getQuantidadeAcoesVendida(); i++) {
+					//Gera a ordem de venda e salva ela
+					Ordem compra = new Ordem(dto.getIdCliente(), dto.getCodigoEmpresa(), dto.getValorOrdem(), dto.getPrazoMin());
+					registrarCompraAcao(compra);
+				}
 			}
 			
 			

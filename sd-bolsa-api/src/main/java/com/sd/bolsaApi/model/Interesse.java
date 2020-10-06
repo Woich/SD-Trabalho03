@@ -10,21 +10,21 @@ public class Interesse implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private ClienteControle cliente;
-	private Empresa empresa;
+	private String codigoEmpresa;
 	private double valGanho;
 	private double valPerda;
 	
-	public Interesse(ClienteControle cliente, Empresa empresa) {
+	public Interesse(ClienteControle cliente, String codigoEmpresa) {
 		
 		this.cliente = cliente;
-		this.empresa = empresa;
+		this.codigoEmpresa = codigoEmpresa;
 		
 	}
 	
-	public Interesse(ClienteControle cliente, Empresa empresa, double valGanho, double valPerda) {
+	public Interesse(ClienteControle cliente, String codigoEmpresa, double valGanho, double valPerda) {
 		
 		this.cliente = cliente;
-		this.empresa = empresa;
+		this.codigoEmpresa = codigoEmpresa;
 		
 		this.valGanho = valGanho;
 		this.valPerda = valPerda;
@@ -34,9 +34,8 @@ public class Interesse implements Serializable{
 	public ClienteControle getCliente() {
 		return cliente;
 	}
-	public Empresa getEmpresa() {
-		return empresa;
-	}
+	
+	
 
 	public double getValGanho() {
 		return valGanho;
