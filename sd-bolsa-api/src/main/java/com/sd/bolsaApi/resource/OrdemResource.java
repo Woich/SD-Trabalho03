@@ -266,7 +266,7 @@ public class OrdemResource {
 				
 				if(!empresaDto.isAtualizado()) {
 					
-					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(empresaDto.toString())).uri(URI.create(uriAtualizaAcoes)).build();
+					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(empresaDto.toString())).uri(URI.create(uriAtualizaEmpresa)).build();
 					HttpResponse<?> response;
 					
 					response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
