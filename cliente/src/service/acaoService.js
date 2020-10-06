@@ -13,13 +13,14 @@ const comprarAcao = async (
     var data = {
         idCliente,
         codigoEmpresa,
-        tipoOrdem: 1,
-        valorCompra: maxCompra,
+        tipoOrdem: 2,
+        valorOrdem: maxCompra,
         quantidadeAcoesVendida: qtdCompra,
         prazoMin: tempo
-
     };
-    await axios.post(`${URL}/ordens/registrar`, data);
+    await axios.post(`${URL}/ordens/registrar`, data).catch((err) => {
+        console.log(err);
+    });
 };
 
 const venderAcao = async (
@@ -31,11 +32,10 @@ const venderAcao = async (
     var data = {
         idCliente,
         codigoEmpresa,
-        tipoOrdem: 2,
-        valorCompra: maxVenda,
+        tipoOrdem: 1,
+        valorOrdem: maxVenda,
         quantidadeAcoesVendida: qtdVenda,
         prazoMin: tempo
-
     };
     await axios.post(`${URL}/ordens/registrar`, data);
 };
