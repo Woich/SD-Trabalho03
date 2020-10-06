@@ -9,20 +9,23 @@ import org.json.JSONObject;
 @XmlRootElement
 public class AcaoAtualizacaoDTO {
 	
-	String codEmpresa;
-	String codAcao; 
-	UUID idNovoDono; 
-	double valorCompra;
-	boolean aVenda;
+	private String codEmpresa;
+	private String codAcao; 
+	private UUID idNovoDono; 
+	private double valorCompra;
+	private boolean vendendo;
+	private boolean atualizado;
 	
+	public AcaoAtualizacaoDTO() {}
 	
-	public AcaoAtualizacaoDTO(String codEmpresa, String codAcao, UUID idNovoDono, double valorCompra, boolean aVenda) {
+	public AcaoAtualizacaoDTO(String codEmpresa, String codAcao, UUID idNovoDono, double valorCompra, boolean vendendo) {
 		
 		this.codEmpresa = codEmpresa;
 		this.codAcao = codAcao;
 		this.idNovoDono = idNovoDono;
 		this.valorCompra = valorCompra;
-		this.aVenda = aVenda;
+		this.vendendo = vendendo;
+		this.atualizado = false;
 		
 	}
 	
@@ -32,8 +35,8 @@ public class AcaoAtualizacaoDTO {
 		this.codAcao = objetoAcao.getString("codigo");
 		this.idNovoDono = idCliente;
 		this.valorCompra = objetoAcao.getDouble("precoDeCompra");
-		this.aVenda = objetoAcao.getBoolean("aVenda");
-		
+		this.vendendo = objetoAcao.getBoolean("vendendo");
+		this.atualizado = false;
 	}
 	
 	public String getCodAcao() {
@@ -56,12 +59,15 @@ public class AcaoAtualizacaoDTO {
 	public void setValorCompra(double valorCompra) {
 		this.valorCompra = valorCompra;
 	}
-	public boolean isaVenda() {
-		return aVenda;
+	
+	public boolean isVendendo() {
+		return vendendo;
 	}
-	public void setaVenda(boolean aVenda) {
-		this.aVenda = aVenda;
+
+	public void setVendendo(boolean vendendo) {
+		this.vendendo = vendendo;
 	}
+
 	public String getCodEmpresa() {
 		return codEmpresa;
 	}
@@ -69,6 +75,20 @@ public class AcaoAtualizacaoDTO {
 	public void setCodEmpresa(String codEmpresa) {
 		this.codEmpresa = codEmpresa;
 	}
+
+	public boolean isAtualizado() {
+		return atualizado;
+	}
+
+	public void setAtualizado(boolean atualizado) {
+		this.atualizado = atualizado;
+	}
 	
-	
+	@Override
+	public String toString() {
+		
+		JSONObject object = new JSONObject(this);
+		
+		return object.toString();
+	}
 }

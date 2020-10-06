@@ -5,12 +5,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,8 +24,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.sd.bolsaApi.dto.AcaoAtualizacaoDTO;
+import com.sd.bolsaApi.dto.EmpresaAtualizacaoDTO;
 import com.sd.bolsaApi.dto.OrdemDTO;
 import com.sd.bolsaApi.enums.TipoOrdemEnum;
+import com.sd.bolsaApi.model.Acao;
 import com.sd.bolsaApi.model.Ordem;
 
 @Path("/ordens")
@@ -31,9 +35,15 @@ public class OrdemResource {
 	
 	List<Ordem> listaOrdensCompra;
 	List<Ordem> listaOrdensVenda;
-	List<AcaoAtualizacaoDTO> listaAtualizacoes;
+	
+	List<AcaoAtualizacaoDTO> listaAcoesAtualizacao;
+	List<EmpresaAtualizacaoDTO> listaEmpresaAtualizacao;
 	
 	final String uriAcoes = "http://localhost:8080/sd-bolsa-api/restapi/empresa/acoes";
+	
+	final String uriAtualizaAcoes = "http://localhost:8080/sd-bolsa-api/restapi/empresa/atualizaacao";
+	final String uriAtualizaEmpresa = "http://localhost:8080/sd-bolsa-api/restapi/empresa/atualizaempresa";
+	
 	private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
@@ -42,6 +52,7 @@ public class OrdemResource {
 	/* ------------------------- LÓGICA (END POINTS) ------------------------- */
 	
 	@POST
+	@Path("/registrar")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response registrarOrdem(OrdemDTO dto) {
@@ -73,54 +84,64 @@ public class OrdemResource {
 		
 		try {
 			//Constroi a uri com o id do cliente
-			if(dto.getTipoOrdem() == TipoOrdemEnum.COMPRA.getCodigo()) {
+			if(dto.getTipoOrdem() == TipoOrdemEnum.VENDA.getCodigo()) {
 				uriAcoesCliente = new URI(uriAcoes +"/"+ dto.getIdCliente().toString());
-			}else {
-				uriAcoesCliente = new URI(uriAcoes);
-			}
-			
-			//Constroi o request
-			HttpRequest request = HttpRequest.newBuilder().GET().uri(uriAcoesCliente).build();
-			
-			//Obtem o response como um string
-			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-			
-			//Cria um objeto json para ser trabalhado com a string de reponse
-			JSONObject jsonAcoes = new JSONObject(response.body().toString());
-			
-			//Obtem o array de ações que foi retornado
-			JSONArray listaAcoesCliente = jsonAcoes.getJSONArray("acoes");
-			
-			listaAtualizacoes = new ArrayList<AcaoAtualizacaoDTO>();
-			
-			//Gera a lista de ações como a lista de atualizações possíveis a serem enviadas
-			for(int j = 0; j< listaAcoesCliente.length(); j++) {
-				listaAtualizacoes.add(new AcaoAtualizacaoDTO(listaAcoesCliente.getJSONObject(j), dto.getIdCliente()));
-			}
-			
-			//Cria uma ordem de compra/venda cada ação com base na quantidade pedida
-			for(int i=0; i < dto.getQuantidadeAcoesVendida(); i++) {
 				
-				for(AcaoAtualizacaoDTO acaoDto : listaAtualizacoes) {
+				//Constroi o request
+				HttpRequest request = HttpRequest.newBuilder().GET().uri(uriAcoesCliente).build();
+				
+				//Obtem o response como um string
+				HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+				
+				//Cria um objeto json para ser trabalhado com a string de reponse
+				JSONObject jsonAcoes = new JSONObject(response.body().toString());
+				
+				//Obtem o array de ações que foi retornado
+				JSONArray listaAcoesCliente = jsonAcoes.getJSONArray("acoes");
+				
+				List<Acao> listaAcoes = new ArrayList<Acao>();
+				
+				//Gera a lista de ações como a lista de atualizações possíveis a serem enviadas
+				for(int j = 0; j< listaAcoesCliente.length(); j++) {
+					listaAcoes.add(new Acao(listaAcoesCliente.getJSONObject(j), dto.getIdCliente()));
+				}
+				
+				//Cria uma ordem de compra/venda cada ação com base na quantidade pedida
+				for(int i=0; i < dto.getQuantidadeAcoesVendida(); i++) {
 					
-					if(dto.getCodigoEmpresa().equals(acaoDto.getCodEmpresa()) && !acaoDto.isaVenda()) {
+					boolean isSelecionado = true;
+					for(Acao acao : listaAcoes) {
 						
-						if(dto.getTipoOrdem() == TipoOrdemEnum.COMPRA.getCodigo()) {
-							//Gera a ordem de venda e salva ela
-							Ordem compra = new Ordem(dto.getIdCliente(), acaoDto.getCodAcao(), 0, dto.getValorOrdem(), dto.getPrazoMin());
-							registrarCompraAcao(compra);
-						}else {
-							//Gera a ordem de compra e salva ela
-							Ordem venda = new Ordem(dto.getIdCliente(), acaoDto.getCodAcao(), dto.getValorOrdem(), 0, dto.getPrazoMin());
-							registrarVendaAcao(venda);
+						if(dto.getCodigoEmpresa().equals(acao.getCodigoEmpresa()) && isSelecionado) {
+							
+							
+							if(!acao.isaVenda()) {
+								//Gera a ordem de compra e salva ela
+								Ordem venda = new Ordem(dto.getIdCliente(), acao.getCodigo(), dto.getValorOrdem(), 0, dto.getPrazoMin());
+								registrarVendaAcao(venda);
+								
+								acao.setaVenda(true);
+								isSelecionado = false;
+								//Gera uma atualização para informar que a ação está a venda
+								if(listaAcoesAtualizacao == null || listaAcoesAtualizacao.isEmpty()) {
+									listaAcoesAtualizacao = new ArrayList<AcaoAtualizacaoDTO>();
+								}
+								
+								listaAcoesAtualizacao.add(new AcaoAtualizacaoDTO(acao.getCodigoEmpresa(), acao.getCodigo(), acao.getIdClienteDono(), acao.getPrecoDeCompra(), true));
+							}
+							
+							
 						}
 						
-						acaoDto.setaVenda(true);
 					}
 					
 				}
-				
+			}else {
+				//Gera a ordem de venda e salva ela
+				Ordem compra = new Ordem(dto.getIdCliente(), dto.getCodigoEmpresa(), dto.getValorOrdem(), dto.getPrazoMin());
+				registrarCompraAcao(compra);
 			}
+			
 			
 			checkOrdens();
 			
@@ -129,6 +150,18 @@ public class OrdemResource {
 		}
 		
 		return Response.ok().build();
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response obterOrdensCompra() {
+		return Response.ok(listaOrdensCompra).build();
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response obterOrdensVenda() {
+		return Response.ok(listaOrdensVenda).build();
 	}
 	
 	/* ------------------------- LÓGICA (INTERNA) ------------------------- */
@@ -180,7 +213,7 @@ public class OrdemResource {
 				for(Ordem compra : listaOrdensCompra) {
 					boolean isSelecionado = true;
 					for(Ordem venda : listaOrdensVenda) {
-						if( isSelecionado && venda.getCodigoAcao().substring(0, 4).equals(compra.getCodigoEmpresa()) && venda.getPrecoMinimoVenda() <= compra.getPrecoMaximoCompra()) {
+						if( isSelecionado && venda.getCodigoAcao().substring(0, 5).equals(compra.getCodigoEmpresa()) && venda.getPrecoMinimoVenda() <= compra.getPrecoMaximoCompra()) {
 							realizarVenda(venda, compra);
 							comprasARemover.add(compra);
 							vendaARemover = venda;
@@ -194,6 +227,10 @@ public class OrdemResource {
 				listaOrdensCompra.removeAll(comprasARemover);
 			}
 			
+			
+			realizarAtualizacoes();
+			
+			
 		}catch (Exception e) {
 			System.out.println(e);
 		}
@@ -201,6 +238,69 @@ public class OrdemResource {
 	}
 	
 	private synchronized void realizarVenda(Ordem venda, Ordem compra) {
+		
+		if(listaEmpresaAtualizacao == null || listaEmpresaAtualizacao.isEmpty()) {
+			listaEmpresaAtualizacao = new ArrayList<EmpresaAtualizacaoDTO>();
+		}
+		
+		//Adiciona uma atualização na lista de atualização de empresas
+		listaEmpresaAtualizacao.add(new EmpresaAtualizacaoDTO(compra.getCodigoEmpresa(), compra.getPrecoMaximoCompra()));
+		
+		if(listaAcoesAtualizacao == null || listaAcoesAtualizacao.isEmpty()) {
+			listaAcoesAtualizacao = new ArrayList<AcaoAtualizacaoDTO>();
+		}
+		
+		//Adiciona uma atualização na lista de atualização de ações
+		listaAcoesAtualizacao.add(new AcaoAtualizacaoDTO(compra.getCodigoEmpresa(), venda.getCodigoAcao(), compra.getIdCliente(), compra.getPrecoMaximoCompra(), false));
+		
+	}
+	
+	private synchronized void realizarAtualizacoes() {
+		try {
+		
+			if(listaEmpresaAtualizacao == null || listaEmpresaAtualizacao.isEmpty()) {
+				listaEmpresaAtualizacao = new ArrayList<EmpresaAtualizacaoDTO>();
+			}
+			
+			for(EmpresaAtualizacaoDTO empresaDto : listaEmpresaAtualizacao) {
+				
+				if(!empresaDto.isAtualizado()) {
+					
+					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(empresaDto.toString())).uri(URI.create(uriAtualizaAcoes)).build();
+					HttpResponse<?> response;
+					
+					response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+					
+					if(response.statusCode() == 200) {
+						empresaDto.setAtualizado(true);
+					}
+				}
+				
+			}
+			
+			if(listaAcoesAtualizacao == null || listaAcoesAtualizacao.isEmpty()) {
+				listaAcoesAtualizacao = new ArrayList<AcaoAtualizacaoDTO>();
+			}
+			
+			for(AcaoAtualizacaoDTO acaoDto : listaAcoesAtualizacao) {
+				
+				if(!acaoDto.isAtualizado()) {
+					
+					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(acaoDto.toString())).uri(URI.create(uriAtualizaAcoes)).build();
+					HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+					
+					if(response.statusCode() == 200) {
+						acaoDto.setAtualizado(true);
+					}else {
+						System.out.println(response.body());
+					}
+				}
+				
+			}
+		
+		} catch (IOException | InterruptedException e) {
+			System.out.println(e);
+		}
 		
 	}
 }

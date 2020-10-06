@@ -245,7 +245,7 @@ public class EmpresaResource {
 		}
 		
 		//Tenta atualiza a ação
-		boolean atualizouAcao = atualizarAcao(dto.getCodAcao(), dto.getIdNovoDono(), dto.getValorCompra(), dto.isaVenda());
+		boolean atualizouAcao = atualizarAcao(dto.getCodAcao(), dto.getIdNovoDono(), dto.getValorCompra(), dto.isVendendo());
 		
 		if(atualizouAcao) {
 			//Caso consiga retorna OK

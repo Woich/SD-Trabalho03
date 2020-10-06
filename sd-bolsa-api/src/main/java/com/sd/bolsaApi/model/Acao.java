@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONObject;
+
 @XmlRootElement
 public class Acao implements Serializable{
 	
@@ -22,7 +24,7 @@ public class Acao implements Serializable{
 		this.preco = preco;
 		this.precoDeCompra = 0;
 		this.idClienteDono = null;
-		aVenda = false;
+		this.aVenda = false;
 	}
 	
 	public Acao (String codigo, double preco, Empresa empresa) {
@@ -31,7 +33,7 @@ public class Acao implements Serializable{
 		this.precoDeCompra = 0;
 		this.codigoEmpresa = empresa.getCodigo();
 		this.idClienteDono = null;
-		aVenda = false;
+		this.aVenda = false;
 	}
 	
 	public Acao (String codigo, double preco, Empresa empresa, UUID idClienteDono) {
@@ -39,6 +41,15 @@ public class Acao implements Serializable{
 		this.preco = preco;
 		this.precoDeCompra = 0;
 		this.codigoEmpresa = empresa.getCodigo();
+		this.idClienteDono = idClienteDono;
+		this.aVenda = false;
+	}
+	
+	public Acao(JSONObject json, UUID idClienteDono) {
+		this.codigo = json.getString("codigo");
+		this.preco = json.getDouble("preco");
+		this.precoDeCompra = json.getDouble("precoDeCompra");
+		this.codigoEmpresa = json.getString("codigoEmpresa");
 		this.idClienteDono = idClienteDono;
 		this.aVenda = false;
 	}
