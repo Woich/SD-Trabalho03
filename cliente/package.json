@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.20.0",
+    "eventsource": "^1.0.7",
     "prompt-sync": "^4.2.0",
     "require": "^2.4.20"
   },

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const URL = 'http://localhost:8080/sd-bolsa-api/restapi';
 
 const registrarInteresse = async (
     idCliente,
@@ -12,7 +13,7 @@ const registrarInteresse = async (
         valGanho,
         valPerda
     };
-    await axios.post('https://testeendpontq.free.beeceptor.com', data);
+    await axios.post(`${URL}/cliente/interesse/registrar`, data);
 };
 
 const removeInteresse = async (idCliente, codEmpresaInteresse) => {
@@ -20,15 +21,8 @@ const removeInteresse = async (idCliente, codEmpresaInteresse) => {
         idCliente,
         codEmpresaInteresse
     };
-    await axios.post('https://testeendpontq.free.beeceptor.com', data);
-};
-
-const listarNotificacoes = async () => {
-    console.log('notificação 1');
-    console.log('notificação 2');
-    console.log('notificação 3');
+    await axios.delete(`${URL}/cliente/interesse/remover`, data);
 };
 
 exports.registrarInteresse = registrarInteresse;
-exports.listarNotificacoes = listarNotificacoes;
 exports.removeInteresse = removeInteresse;

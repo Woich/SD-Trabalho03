@@ -1,19 +1,21 @@
 const axios = require('axios');
 
+const URL = 'http://localhost:8080/sd-bolsa-api/restapi';
+
 const inserirEmpresa = async (nomeEmpresa, qtdAcoes, idCliente) => {
     const data = {
-        nomeEmpresa,
-        qtdAcoes,
+        nome: nomeEmpresa,
+        quantidadeTotalAcoes: qtdAcoes,
         idCliente
     };
-    await axios.post('https://testeendpontq.free.beeceptor.com', data);
+    await axios.post(`${URL}/empresa/registrar`, data);
 };
 
 const listarEmpresas = () =>
-    axios.get('https://testeendpontq.free.beeceptor.com');
+    axios.get(`${URL}/empresa`);
 
 const listarEmpresasInteressado = (idCliente) =>
-    axios.get('https://testeendpontq.free.beeceptor.com');
+    axios.get(`${URL}/cliente/interesse/${idCliente}`);
 
 exports.inserirEmpresa = inserirEmpresa;
 exports.listarEmpresas = listarEmpresas;

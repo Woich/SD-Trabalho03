@@ -1,53 +1,53 @@
 const axios = require('axios');
+const URL = 'http://localhost:8080/sd-bolsa-api/restapi';
 
-const listarAcoesCliente = async (idCliente) => {
-    return [{
-        codigo: 'asdasd',
-        precoDeCompra: '12',
-        empresa: {
-            codigo: '123'
-        }
-    },
-    {
-        codigo: 'asdasd2',
-        precoDeCompra: '13',
-        empresa: {
-            codigo: '123'
-        }
-    },
-    {
-        codigo: 'asdasd2',
-        precoDeCompra: '15',
-        empresa: {
-            codigo: '123'
-        }
-    }];
-};
+const listarAcoesCliente = async (idCliente) =>
+    axios.get(`${URL}/empresa/acoes/${idCliente}`);
 
 const comprarAcao = async (
-    codigoEmpresaCompra,
-    maxPagar,
-    minCompra,
+    codigoEmpresa,
+    maxCompra,
+    tempo,
     idCliente,
     qtdCompra) => {
-    return true;
+    var data = {
+        idCliente,
+        codigoEmpresa,
+        tipoOrdem: 1,
+        valorCompra: maxCompra,
+        quantidadeAcoesVendida: qtdCompra,
+        prazoMin: tempo
+
+    };
+    await axios.post(`${URL}/ordens/registrar`, data);
 };
 
 const venderAcao = async (
-    codigoAcaoVenda,
-    minReceber,
-    minVenda,
+    codigoEmpresa,
+    maxVenda,
+    tempo,
     idCliente,
-    qtdVenda
-) => {
-    return true;
+    qtdVenda) => {
+    var data = {
+        idCliente,
+        codigoEmpresa,
+        tipoOrdem: 2,
+        valorCompra: maxVenda,
+        quantidadeAcoesVendida: qtdVenda,
+        prazoMin: tempo
+
+    };
+    await axios.post(`${URL}/ordens/registrar`, data);
 };
 
-const insertCotacao = async (valorCotacao) => {
-    return true;
-};
+const insertCotacaoValorizacao = async (valorCotacao) =>
+    axios.post(`${URL}/empresa/valorizacao/${valorCotacao}`);
+
+const insertCotacaoDesvalorizacao = async (valorCotacao) =>
+    axios.post(`${URL}/empresa/desvalorizacao/${valorCotacao}`);
 
 exports.listarAcoesCliente = listarAcoesCliente;
 exports.comprarAcao = comprarAcao;
 exports.venderAcao = venderAcao;
-exports.insertCotacao = insertCotacao;
+exports.insertCotacaoValorizacao = insertCotacaoValorizacao;
+exports.insertCotacaoDesvalorizacao = insertCotacaoDesvalorizacao;
