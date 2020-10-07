@@ -184,6 +184,7 @@ public class ClienteControleResource {
 	
 	public void notificar(NotificacaoDTO dto) {
 		
+		//Gera a notificação
 		Notificacao notificacao;
 		
 		if(dto.isEhEpresa()) {
@@ -218,12 +219,16 @@ public class ClienteControleResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response notificarInteresse(ListaEmpresaDTO dto) {
 		
+		//Percorre lista de empresas
 		for(Empresa empresa : dto.getEmpresas()) {
 			
+			//Percorres lista de interesses
 			for(Interesse interesse : listaInteresses) {
 				
+				//Caso ache um interesse para a empresa em questão
 				if(empresa.getCodigo().equals(interesse.getCodigoEmpresa())) {
 					
+					//Verifica qual se o valor dela bate com os valores de interesse e manda a mensagems
 					if(empresa.getValorEmpresa() > interesse.getValGanho()) {
 						notificar(new NotificacaoDTO(interesse.getCodigoEmpresa(), interesse.getIdCliente(), TipoNotificacao.EMPRESA_VALOR_MAXIMO.getCodigo()));
 					}

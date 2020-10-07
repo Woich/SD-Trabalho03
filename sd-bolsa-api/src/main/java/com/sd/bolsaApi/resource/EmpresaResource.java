@@ -333,7 +333,8 @@ public class EmpresaResource {
 	private synchronized boolean atualizarEmpresa(String codEmpresa, double valorNovo) {
 		try {
 			
-			Empresa empr = this.listaEmpresa.stream().filter(e -> e.getCodigo().equals(codEmpresa)).findAny().orElse(null); //busca a empresa informada
+			//Busca a empresa informada
+			Empresa empr = this.listaEmpresa.stream().filter(e -> e.getCodigo().equals(codEmpresa)).findAny().orElse(null); 
 			
 			if(empr != null) {
 				//Caso exista a empresa, remove ela, atualiza os valores e add ela novamente
@@ -368,12 +369,14 @@ public class EmpresaResource {
 					adicionarInteresse(idNovoDono, acao.getCodigoEmpresa(), valorCompra, valorCompra);
 				}
 				
+				//Atualzia os valores necessários
 				acao.setIdClienteDono(idNovoDono);
 				
 				acao.setPrecoDeCompra(valorCompra);
 				
 				acao.setaVenda(aVenda);
 				
+				//Adiciona nalista novamente
 				listaAcoes.add(acao);
 				
 			}else {
@@ -391,6 +394,7 @@ public class EmpresaResource {
 		
 		try {
 			
+			//Constroi a lista de atualizações
 			ListaEmpresaDTO listaAtualizacao = new ListaEmpresaDTO();
 			
 			listaAtualizacao.adicionarLista(listaEmpresa);
