@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 import com.sd.bolsaApi.dto.AcaoAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaDTO;
+import com.sd.bolsaApi.dto.InteresseDTO;
 import com.sd.bolsaApi.dto.ListaAcoesDTO;
 import com.sd.bolsaApi.dto.ListaEmpresaDTO;
 import com.sd.bolsaApi.model.Acao;
@@ -36,6 +37,7 @@ public class EmpresaResource {
 	List<Acao> listaAcoes;
 	
 	final String uriInteresse = "http://localhost:8080/sd-bolsa-api/restapi/cliente/interesse/notificar";
+	final String uriInteresseRegistrar = "http://localhost:8080/sd-bolsa-api/restapi/cliente/interesse/registrar";
 	
 	private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
@@ -91,10 +93,14 @@ public class EmpresaResource {
 			boolean empresaSalva = addEmpresa(novaEmpresa);
 			
 			if(empresaSalva) {
+				
 				//Tenta add as ações
 				boolean acoesSalvas = addListaAcoes(novaEmpresa.getAcoes());
 				
 				if(acoesSalvas) {
+					//Gera um interesse padrão na empresa
+					adicionarInteresse(empresaDTO.getIdCliente(), novaEmpresa.getCodigo(), 0, 0);
+					
 					//Caso consiga criar a emrepsa e as ações retorna um CREATED
 					return Response
 							.status(Status.CREATED)
@@ -357,6 +363,11 @@ public class EmpresaResource {
 				//Caso exista a ação, remove ela, atualiza os valores e add ela novamente
 				listaAcoes.remove(acao);
 				
+				if(!acao.getIdClienteDono().equals(idNovoDono)) {
+					//Gera um interesse padrão na empresa
+					adicionarInteresse(idNovoDono, acao.getCodigoEmpresa(), valorCompra, valorCompra);
+				}
+				
 				acao.setIdClienteDono(idNovoDono);
 				
 				acao.setPrecoDeCompra(valorCompra);
@@ -398,5 +409,25 @@ public class EmpresaResource {
 			System.out.println(e);
 		}
 		
+	}
+	
+	private void adicionarInteresse(UUID idCliente, String codEmpresa, double valGanho, double valPerda) {
+		InteresseDTO dto = new InteresseDTO(idCliente, codEmpresa, valGanho, valPerda);
+		
+		try {
+			
+			//Envia o post para gerar o interesse
+			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
+						.POST(BodyPublishers.ofString(dto.toString()))
+						.uri(URI.create(uriInteresseRegistrar))
+						.build();
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			
+			System.out.println(response.statusCode());
+			System.out.println(response.body());
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 }

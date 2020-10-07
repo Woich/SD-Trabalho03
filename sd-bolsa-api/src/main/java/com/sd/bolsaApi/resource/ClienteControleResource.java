@@ -224,11 +224,11 @@ public class ClienteControleResource {
 				
 				if(empresa.getCodigo().equals(interesse.getCodigoEmpresa())) {
 					
-					if(empresa.getValorEmpresa() >= interesse.getValGanho()) {
+					if(empresa.getValorEmpresa() > interesse.getValGanho()) {
 						notificar(new NotificacaoDTO(interesse.getCodigoEmpresa(), interesse.getIdCliente(), TipoNotificacao.EMPRESA_VALOR_MAXIMO.getCodigo()));
 					}
 					
-					if(empresa.getValorEmpresa() <= interesse.getValPerda()) {
+					if(empresa.getValorEmpresa() < interesse.getValPerda()) {
 						notificar(new NotificacaoDTO(interesse.getCodigoEmpresa(), interesse.getIdCliente(), TipoNotificacao.EMPRESA_VALOR_MINIMO.getCodigo()));
 					}
 					

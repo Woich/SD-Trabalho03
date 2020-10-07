@@ -2,6 +2,8 @@ package com.sd.bolsaApi.dto;
 
 import java.util.UUID;
 
+import org.json.JSONObject;
+
 public class InteresseDTO {
 	
 	private UUID idCliente;
@@ -50,6 +52,12 @@ public class InteresseDTO {
 		this.valPerda = valPerda;
 	}
 	
-	
+	@Override
+	public String toString() {
+		
+		JSONObject object = new JSONObject(this);
+		
+		return object.toString();
+	}
 	
 }
