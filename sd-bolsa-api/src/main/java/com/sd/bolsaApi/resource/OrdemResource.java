@@ -151,7 +151,7 @@ public class OrdemResource {
 			e.printStackTrace();
 		}
 		
-		return Response.ok().build();
+		return Response.status(Status.CREATED).build();
 	}
 	
 	@GET
@@ -207,26 +207,32 @@ public class OrdemResource {
 	private synchronized void checkOrdens() {
 		
 		try {
-			
+			//Inicializa as listas
 			List<Ordem> comprasARemover = new ArrayList<Ordem>(0);
 			Ordem vendaARemover = new Ordem();
 			
+			//Caso exista compras e vendas
 			if(listaOrdensCompra != null && listaOrdensCompra.size() > 0 && listaOrdensVenda != null && listaOrdensVenda.size() > 0) {
 				for(Ordem compra : listaOrdensCompra) {
+					//Percorre a lista de compras
 					boolean isSelecionado = true;
 					for(Ordem venda : listaOrdensVenda) {
+						//Percorre a lista de vendas
 						if( isSelecionado && venda.getCodigoAcao().substring(0, 5).equals(compra.getCodigoEmpresa()) && venda.getPrecoMinimoVenda() <= compra.getPrecoMaximoCompra()) {
-							realizarVenda(venda, compra);
-							comprasARemover.add(compra);
-							vendaARemover = venda;
-							isSelecionado = false;
+							//Caso ainda não tenha acontecido o match, e a venda e a compra sejam da mesma empresa
+							//com os valor da compra >= ao da venda
+							
+							realizarVenda(venda, compra); //Realiza a venda
+							comprasARemover.add(compra); //Adiciona a compra na lista de remoção
+							vendaARemover = venda; //Adiciona a venda para remoção
+							isSelecionado = false; //Marca que ocorreu o match
 						}
 					}
 					
-					listaOrdensVenda.remove(vendaARemover);
+					listaOrdensVenda.remove(vendaARemover); //Remove a venda da lista
 				}
 				
-				listaOrdensCompra.removeAll(comprasARemover);
+				listaOrdensCompra.removeAll(comprasARemover); //Remove todas as compras que aconteceram
 			}
 			
 			
@@ -259,20 +265,23 @@ public class OrdemResource {
 	
 	private synchronized void realizarAtualizacoes() {
 		try {
-		
+			
+			//Para evitar erro do servidor em caso lista vazia inicializa
 			if(listaEmpresaAtualizacao == null || listaEmpresaAtualizacao.isEmpty()) {
 				listaEmpresaAtualizacao = new ArrayList<EmpresaAtualizacaoDTO>();
 			}
 			
+			//Percorre a lista
 			for(EmpresaAtualizacaoDTO empresaDto : listaEmpresaAtualizacao) {
 				
 				if(!empresaDto.isAtualizado()) {
-					
+					//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
 					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(empresaDto.toString())).uri(URI.create(uriAtualizaEmpresa)).build();
 					HttpResponse<?> response;
 					
 					response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 					
+					//Caso consiga realizar a atualização marca que a atualização aconteceu
 					if(response.statusCode() == 200) {
 						empresaDto.setAtualizado(true);
 					}
@@ -280,21 +289,23 @@ public class OrdemResource {
 				
 			}
 			
+			//Para evitar erro do servidor em caso lista vazia inicializa
 			if(listaAcoesAtualizacao == null || listaAcoesAtualizacao.isEmpty()) {
 				listaAcoesAtualizacao = new ArrayList<AcaoAtualizacaoDTO>();
 			}
 			
+			
+			//Percorre a lista
 			for(AcaoAtualizacaoDTO acaoDto : listaAcoesAtualizacao) {
 				
 				if(!acaoDto.isAtualizado()) {
-					
+					//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
 					HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json").PUT(BodyPublishers.ofString(acaoDto.toString())).uri(URI.create(uriAtualizaAcoes)).build();
 					HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 					
+					//Caso consiga realizar a atualização marca que a atualização aconteceu
 					if(response.statusCode() == 200) {
 						acaoDto.setAtualizado(true);
-					}else {
-						System.out.println(response.body());
 					}
 				}
 				

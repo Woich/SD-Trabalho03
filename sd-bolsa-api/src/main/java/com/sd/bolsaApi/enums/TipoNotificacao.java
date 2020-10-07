@@ -2,10 +2,11 @@ package com.sd.bolsaApi.enums;
 
 public enum TipoNotificacao {
 	
-	VENDA_REALIZADA(1, "Venda Realizada"),
-	COMPRA_REALIZADA(2, "Compra Realizada"),
-	EMPRESA_VALOR_MINIMO(3, "Empresa atingiu valor minimo"),
-	EMPRESA_VALOR_MAXIMO(4, "Empresa atingiu valor máximo");
+	LOGIN(1, "Login Realizado"),
+	VENDA_REALIZADA(2, "Venda Realizada"),
+	COMPRA_REALIZADA(3, "Compra Realizada"),
+	EMPRESA_VALOR_MINIMO(4, "Empresa atingiu valor minimo"),
+	EMPRESA_VALOR_MAXIMO(5, "Empresa atingiu valor máximo");
 	
 	TipoNotificacao(int codigo, String descricao) {
 		this.codigo = codigo;
