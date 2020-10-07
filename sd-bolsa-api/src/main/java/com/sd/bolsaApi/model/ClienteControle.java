@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.sd.bolsaApi.dto.ClienteDTO;
+
 /*
  * 
  * Autores:
@@ -18,14 +20,23 @@ public class ClienteControle implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private UUID id;
-	
+	private String uri = "http://localhost:<port>/api/mensagem";
 	
 	public ClienteControle() {
 		this.id = UUID.randomUUID();
 	}
 	
+	public ClienteControle(ClienteDTO dto) {
+		this.id = UUID.randomUUID();
+		this.uri = uri.replace("<port>", dto.getPort());
+	}
+	
 	public UUID getID() {
 		return this.id;
+	}
+	
+	public String getUri() {
+		return uri;
 	}
 
 	@Override

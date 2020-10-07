@@ -1,28 +1,33 @@
 package com.sd.bolsaApi.resource;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.sse.Sse;
-import javax.ws.rs.sse.SseEventSink;
 
+import com.ea.async.Async;
+import com.sd.bolsaApi.dto.ClienteDTO;
 import com.sd.bolsaApi.dto.InteresseDTO;
 import com.sd.bolsaApi.dto.InteresseRemocaoDTO;
-import com.sd.bolsaApi.dto.ListaAcoesDTO;
-import com.sd.bolsaApi.model.Acao;
+import com.sd.bolsaApi.dto.NotificacaoDTO;
+import com.sd.bolsaApi.enums.TipoNotificacao;
 import com.sd.bolsaApi.model.ClienteControle;
 import com.sd.bolsaApi.model.Interesse;
 import com.sd.bolsaApi.model.Notificacao;
@@ -33,9 +38,21 @@ public class ClienteControleResource {
 	List<ClienteControle> listaCliente;
 	List<Interesse> listaInteresses;
 	
+	String uriEventoNotificacao = "http://localhost:8080/sd-bolsa-api/restapi/notificacao";
+	
+	private static final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+	
 	/* ------------------------- LÓGICA (END POINTS) ------------------------- */
 	
+	static { 
+	    Async.init(); 
+	}
+	
 	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response findClientes() {
 		
@@ -47,14 +64,18 @@ public class ClienteControleResource {
 	@POST
 	@Path("/registrar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response cadastrarCliente() {
+	public Response cadastrarCliente(ClienteDTO dto) {
 		 //Gera novo cliente
-		ClienteControle novoCliente = new ClienteControle();
+		ClienteControle novoCliente = new ClienteControle(dto);
 		
 		//Tenta adicionar o cliente na lista
 		boolean foiSalvo = addCliente(novoCliente);
 		
 		if(foiSalvo) {
+			
+			//Async.await(CompletableFuture.runAsync(() -> notificar(new NotificacaoDTO(null, novoCliente.getID(), TipoNotificacao.LOGIN.getCodigo()))));
+			CompletableFuture.runAsync(() -> notificar(new NotificacaoDTO(null, novoCliente.getID(), TipoNotificacao.LOGIN.getCodigo())));
+			
 			//Caso consiga retorna OK com novo cliente
 			return Response
 					.status(Status.CREATED)
@@ -158,6 +179,37 @@ public class ClienteControleResource {
 		
 		//Caso não ache retorna um NOT FOUND
 		return Response.status(Status.NOT_FOUND).build();
+		
+	}
+	
+	public void notificar(NotificacaoDTO dto) {
+		
+		new Thread(new Runnable() { 
+            public void run() 
+            { 
+  
+            	Notificacao notificacao;
+        		
+        		if(dto.isEhEpresa()) {
+        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getCodEmpresa(), dto.getIdCliente());
+        		}else {
+        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getIdCliente());
+        		}
+        		
+        		
+        		try {
+        			//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
+        			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
+        						.POST(BodyPublishers.ofString(notificacao.toString()))
+        						.uri(URI.create(uriEventoNotificacao))
+        						.build();
+        			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        		}catch (Exception e) {
+        			System.out.println(e);
+        		}
+            } 
+        }).start(); 
+		
 		
 	}
 	
