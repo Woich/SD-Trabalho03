@@ -228,9 +228,24 @@ const main = async () => {
                 console.log('-----------------------------------------');
                 break;
             case '11':
+                console.log('-----------------------------------------');
+                console.log('EMPRESAS COM INTERESSE');
+                console.log('-----------------------------------------');
+                console.log('CODIGO | VALOR DE GANHO | VALOR DE PERDA');
+                // lista empresas nas quais o cliente tem interesse, já que, durante a apresentação,
+                // ficou confuso identificar as mensagens e sua estrutura
+                await empresaService.listarEmpresasInteressado(idCliente).then((res) => {
+                    res.data.forEach((item) => {
+                        console.log('-----------------------------------------');
+                        console.log(`${item.codigoEmpresa} | ${item.valGanho} | ${item.valPerda}`);
+                    });
+                });
+
+                console.log('-----------------------------------------');
+                console.log('');
                 // lista mensagens recebidas
                 console.log('-----------------------------------------');
-                console.log('MENSAGENS');
+                console.log('MENSAGENS ([cod empresa]: mensagem)');
 
                 messages.forEach((m) => {
                     if (m.idCliente === idCliente) {
