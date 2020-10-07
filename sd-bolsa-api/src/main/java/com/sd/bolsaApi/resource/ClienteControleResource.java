@@ -73,8 +73,7 @@ public class ClienteControleResource {
 		
 		if(foiSalvo) {
 			
-			//Async.await(CompletableFuture.runAsync(() -> notificar(new NotificacaoDTO(null, novoCliente.getID(), TipoNotificacao.LOGIN.getCodigo()))));
-			CompletableFuture.runAsync(() -> notificar(new NotificacaoDTO(null, novoCliente.getID(), TipoNotificacao.LOGIN.getCodigo())));
+			notificar(new NotificacaoDTO(null, novoCliente.getID(), TipoNotificacao.LOGIN.getCodigo()));
 			
 			//Caso consiga retorna OK com novo cliente
 			return Response
@@ -184,31 +183,25 @@ public class ClienteControleResource {
 	
 	public void notificar(NotificacaoDTO dto) {
 		
-		new Thread(new Runnable() { 
-            public void run() 
-            { 
-  
-            	Notificacao notificacao;
-        		
-        		if(dto.isEhEpresa()) {
-        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getCodEmpresa(), dto.getIdCliente());
-        		}else {
-        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getIdCliente());
-        		}
-        		
-        		
-        		try {
-        			//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
-        			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
-        						.POST(BodyPublishers.ofString(notificacao.toString()))
-        						.uri(URI.create(uriEventoNotificacao))
-        						.build();
-        			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        		}catch (Exception e) {
-        			System.out.println(e);
-        		}
-            } 
-        }).start(); 
+		Notificacao notificacao;
+		
+		if(dto.isEhEpresa()) {
+			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getCodEmpresa(), dto.getIdCliente());
+		}else {
+			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getIdCliente());
+		}
+		
+		
+		try {
+			//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
+			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
+						.POST(BodyPublishers.ofString(notificacao.toString()))
+						.uri(URI.create(uriEventoNotificacao))
+						.build();
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		}catch (Exception e) {
+			System.out.println(e);
+		}
 		
 		
 	}

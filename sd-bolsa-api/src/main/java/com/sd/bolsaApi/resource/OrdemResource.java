@@ -41,6 +41,7 @@ public class OrdemResource {
 	
 	final String uriAcoes = "http://localhost:8080/sd-bolsa-api/restapi/empresa/acoes";
 	
+	final String uriEventoNotificacao = "http://localhost:8080/sd-bolsa-api/restapi/notificacao";
 	final String uriAtualizaAcoes = "http://localhost:8080/sd-bolsa-api/restapi/empresa/atualizaacao";
 	final String uriAtualizaEmpresa = "http://localhost:8080/sd-bolsa-api/restapi/empresa/atualizaempresa";
 	

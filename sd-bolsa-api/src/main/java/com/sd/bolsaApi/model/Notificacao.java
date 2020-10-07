@@ -26,16 +26,28 @@ public class Notificacao {
 		this.message = "["+idCliente.toString()+"]: "+ TipoNotificacao.findDescricaoByCodigo(tipoNotificao);
 	}
 
+	public String getMessage() {
+		return message;
+	}
+	
 	public int getTipoNotificao() {
 		return tipoNotificao;
-	}
-
-	public String getMensagemNotificacao() {
-		return message;
 	}
 	
 	public UUID getIdCliente() {
 		return idCliente;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public void setTipoNotificao(int tipoNotificao) {
+		this.tipoNotificao = tipoNotificao;
+	}
+
+	public void setIdCliente(UUID idCliente) {
+		this.idCliente = idCliente;
 	}
 
 	@Override
