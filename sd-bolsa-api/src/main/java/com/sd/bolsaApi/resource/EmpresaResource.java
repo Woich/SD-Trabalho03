@@ -1,5 +1,11 @@
 package com.sd.bolsaApi.resource;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +25,7 @@ import com.sd.bolsaApi.dto.AcaoAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaDTO;
 import com.sd.bolsaApi.dto.ListaAcoesDTO;
+import com.sd.bolsaApi.dto.ListaEmpresaDTO;
 import com.sd.bolsaApi.model.Acao;
 import com.sd.bolsaApi.model.Empresa;
 
@@ -27,6 +34,13 @@ public class EmpresaResource {
 	
 	List<Empresa> listaEmpresa;
 	List<Acao> listaAcoes;
+	
+	final String uriInteresse = "http://localhost:8080/sd-bolsa-api/restapi/cliente/interesse/notificar";
+	
+	private static final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 	
 	/* ------------------------- LÓGICA (END POINTS) ------------------------- */
 	
@@ -173,6 +187,8 @@ public class EmpresaResource {
 			
 		}
 		
+		notificarInteresse();
+		
 		return Response.ok().build();
 	}
 	
@@ -187,6 +203,8 @@ public class EmpresaResource {
 			empresa.setValorEmpresa(empresa.getValorEmpresa() - valor);
 			
 		}
+		
+		notificarInteresse();
 		
 		return Response.ok().build();
 	}
@@ -211,6 +229,9 @@ public class EmpresaResource {
 		
 		if(atualizouEmpresa) {
 			//Caso consida retorna um ok
+			
+			notificarInteresse();
+			
 			return Response.ok().build();
 		}else {
 			//Caso não, retorna um Internal Server Erro
@@ -353,5 +374,29 @@ public class EmpresaResource {
 			//Caso aconteça um erro retorna que não conseguiu salvar
 			return false;
 		}
+	}
+	
+	private void notificarInteresse() {
+		
+		try {
+			
+			ListaEmpresaDTO listaAtualizacao = new ListaEmpresaDTO();
+			
+			listaAtualizacao.adicionarLista(listaEmpresa);
+			
+			//Envia a notificação de atualização
+			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
+						.POST(BodyPublishers.ofString(listaAtualizacao.toString()))
+						.uri(URI.create(uriInteresse))
+						.build();
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			
+			System.out.println(response.statusCode());
+			System.out.println(response.body());
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		
 	}
 }

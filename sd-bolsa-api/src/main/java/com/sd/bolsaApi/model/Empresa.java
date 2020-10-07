@@ -7,6 +7,9 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.sd.bolsaApi.dto.EmpresaDTO;
 
 @XmlRootElement
@@ -23,6 +26,20 @@ public class Empresa implements Serializable{
 	
 	public Empresa() {
 		this.id = UUID.randomUUID();
+	}
+	
+	public Empresa(JSONObject json) {
+		this.id = UUID.fromString(json.getString("id"));
+		this.nome = json.getString("nome");
+		this.valorEmpresa = json.getDouble("valorEmpresa");
+		
+		JSONArray listaAcoes = json.getJSONArray("acoes");
+		
+		acoes = new ArrayList<Acao>();
+		
+		for(int i =0; i< listaAcoes.length(); i++) {
+			acoes.add(new Acao(listaAcoes.getJSONObject(i)));
+		}
 	}
 	
 	public Empresa(String nome, int quantidadeTotalAcoes) {

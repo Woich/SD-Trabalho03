@@ -26,8 +26,10 @@ import org.json.JSONObject;
 import com.sd.bolsaApi.dto.AcaoAtualizacaoDTO;
 import com.sd.bolsaApi.dto.EmpresaAtualizacaoDTO;
 import com.sd.bolsaApi.dto.OrdemDTO;
+import com.sd.bolsaApi.enums.TipoNotificacao;
 import com.sd.bolsaApi.enums.TipoOrdemEnum;
 import com.sd.bolsaApi.model.Acao;
+import com.sd.bolsaApi.model.Notificacao;
 import com.sd.bolsaApi.model.Ordem;
 
 @Path("/ordens")
@@ -261,6 +263,38 @@ public class OrdemResource {
 		
 		//Adiciona uma atualização na lista de atualização de ações
 		listaAcoesAtualizacao.add(new AcaoAtualizacaoDTO(compra.getCodigoEmpresa(), venda.getCodigoAcao(), compra.getIdCliente(), compra.getPrecoMaximoCompra(), false));
+		
+		try {
+			//Gera notificação de compra
+			Notificacao notificacaoCompra = new Notificacao(TipoNotificacao.COMPRA_REALIZADA.getCodigo(), compra.getCodigoEmpresa(), compra.getIdCliente());
+			
+			//Envia a notificação de atualização
+			HttpRequest requestCompra = HttpRequest.newBuilder().header("Content-Type", "application/json")
+						.POST(BodyPublishers.ofString(notificacaoCompra.toString()))
+						.uri(URI.create(uriEventoNotificacao))
+						.build();
+			HttpResponse<String> responseCompra = httpClient.send(requestCompra, HttpResponse.BodyHandlers.ofString());
+			
+			if(responseCompra.statusCode() == 200) {
+				System.out.println("OK Compra");
+			}
+			
+			//Gerar notificação de venda
+			Notificacao notificacaoVenda = new Notificacao(TipoNotificacao.VENDA_REALIZADA.getCodigo(), compra.getCodigoEmpresa(), venda.getIdCliente());
+			
+			//Envia a notificação de atualização
+			HttpRequest requestVenda = HttpRequest.newBuilder().header("Content-Type", "application/json")
+						.POST(BodyPublishers.ofString(notificacaoVenda.toString()))
+						.uri(URI.create(uriEventoNotificacao))
+						.build();
+			HttpResponse<String> responseVenda = httpClient.send(requestVenda, HttpResponse.BodyHandlers.ofString());
+			
+			if(responseVenda.statusCode() == 200) {
+				System.out.println("OK Venda");
+			}
+		}catch (Exception e) {
+			System.out.println(e);
+		}
 		
 	}
 	

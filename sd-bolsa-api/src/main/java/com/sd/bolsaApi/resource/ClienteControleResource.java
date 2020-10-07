@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -26,9 +25,11 @@ import com.ea.async.Async;
 import com.sd.bolsaApi.dto.ClienteDTO;
 import com.sd.bolsaApi.dto.InteresseDTO;
 import com.sd.bolsaApi.dto.InteresseRemocaoDTO;
+import com.sd.bolsaApi.dto.ListaEmpresaDTO;
 import com.sd.bolsaApi.dto.NotificacaoDTO;
 import com.sd.bolsaApi.enums.TipoNotificacao;
 import com.sd.bolsaApi.model.ClienteControle;
+import com.sd.bolsaApi.model.Empresa;
 import com.sd.bolsaApi.model.Interesse;
 import com.sd.bolsaApi.model.Notificacao;
 
@@ -193,17 +194,51 @@ public class ClienteControleResource {
 		
 		
 		try {
-			//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
+			//Envia a notificação de atualização
 			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
 						.POST(BodyPublishers.ofString(notificacao.toString()))
 						.uri(URI.create(uriEventoNotificacao))
 						.build();
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			
+			if(response.statusCode() == 200) {
+				System.out.println("Ok");
+			}
+			
 		}catch (Exception e) {
 			System.out.println(e);
 		}
 		
 		
+	}
+	
+	@POST
+	@Path("/interesse/notificar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response notificarInteresse(ListaEmpresaDTO dto) {
+		
+		for(Empresa empresa : dto.getEmpresas()) {
+			
+			for(Interesse interesse : listaInteresses) {
+				
+				if(empresa.getCodigo().equals(interesse.getCodigoEmpresa())) {
+					
+					if(empresa.getValorEmpresa() >= interesse.getValGanho()) {
+						notificar(new NotificacaoDTO(interesse.getCodigoEmpresa(), interesse.getIdCliente(), TipoNotificacao.EMPRESA_VALOR_MAXIMO.getCodigo()));
+					}
+					
+					if(empresa.getValorEmpresa() <= interesse.getValPerda()) {
+						notificar(new NotificacaoDTO(interesse.getCodigoEmpresa(), interesse.getIdCliente(), TipoNotificacao.EMPRESA_VALOR_MINIMO.getCodigo()));
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		return Response.ok().build();
 	}
 	
 	/* ------------------------- LÓGICA (INTERNA) ------------------------- */

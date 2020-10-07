@@ -19,6 +19,8 @@ public class Acao implements Serializable{
 	UUID idClienteDono;
 	private boolean aVenda;
 	
+	public Acao () {}
+	
 	public Acao (String codigo, double preco) {
 		this.codigo = codigo;
 		this.preco = preco;
@@ -53,6 +55,8 @@ public class Acao implements Serializable{
 		this.idClienteDono = idClienteDono;
 		this.aVenda = false;
 	}
+	
+	public Acao(JSONObject json) {}
 	
 	public void setCodigo(String codigo) {
 		this.codigo = codigo;

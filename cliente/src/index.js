@@ -15,9 +15,7 @@ const main = async () => {
     const evtSource = new EventSource('http://localhost:8080/sd-bolsa-api/restapi/notificacao');
     evtSource.onmessage = function (event) {
         var res = JSON.parse(event.data);
-        if (res.idCliente === this.idCliente) {
-            messages = [...messages, res.message];
-        }
+        messages = [...messages, res];
     };
     var escolha = '0';
 
@@ -231,9 +229,17 @@ const main = async () => {
                 break;
             case '11':
                 // lista mensagens recebidas
+                console.log('-----------------------------------------');
+                console.log('MENSAGENS');
+
                 messages.forEach((m) => {
-                    console.log(m);
+                    if (m.idCliente === idCliente) {
+                        console.log('-----------------------------------------');
+                        console.log(m.message);
+                    }
                 });
+
+                console.log('-----------------------------------------');
                 break;
             default:
                 break;
