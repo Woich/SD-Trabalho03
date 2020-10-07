@@ -38,6 +38,8 @@ public class ClienteControleResource {
 	List<ClienteControle> listaCliente;
 	List<Interesse> listaInteresses;
 	
+	String uriEventoNotificacao = "http://localhost:8080/sd-bolsa-api/restapi/notificacao";
+	
 	private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
@@ -189,18 +191,17 @@ public class ClienteControleResource {
             	Notificacao notificacao;
         		
         		if(dto.isEhEpresa()) {
-        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getCodEmpresa());
+        			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getCodEmpresa(), dto.getIdCliente());
         		}else {
         			notificacao = new Notificacao(dto.getTipoNotificacao(), dto.getIdCliente());
         		}
         		
-        		ClienteControle cliente = listaCliente.stream().filter(e -> e.getID().equals(dto.getIdCliente())).findAny().orElse(null); //busca a empresa informada
         		
         		try {
         			//Caso encontre um atualização que ainda não foi enviada envia ela para empresa resource via  PUT
         			HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
         						.POST(BodyPublishers.ofString(notificacao.toString()))
-        						.uri(URI.create(cliente.getUri()))
+        						.uri(URI.create(uriEventoNotificacao))
         						.build();
         			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         		}catch (Exception e) {
