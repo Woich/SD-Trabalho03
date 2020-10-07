@@ -21,7 +21,7 @@ const removeInteresse = async (idCliente, codEmpresaInteresse) => {
         idCliente,
         codEmpresaInteresse
     };
-    await axios.delete(`${URL}/cliente/interesse/remover`, data);
+    await axios.put(`${URL}/cliente/interesse/remover`, data);
 };
 
 exports.registrarInteresse = registrarInteresse;

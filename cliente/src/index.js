@@ -2,20 +2,20 @@ const authService = require('./service/authService.js');
 const empresaService = require('./service/empresaService.js');
 const acaoService = require('./service/acaoService.js');
 const notificacaoService = require('./service/notificacaoService.js');
+const express = require('express');
+const bodyParser = require('body-parser');
 var EventSource = require('eventsource');
+
+const port = 1234;
 
 const prompt = require('prompt-sync')();
 
-const main = async () => {
-    var messages = [];
-    const evtSource = new EventSource('ssedemo.php');
-    evtSource.onmessage = function (event) {
-        messages = [...messages, event.data];
-    };
+var messages = [];
 
+const main = async () => {
     var escolha = '0';
 
-    var idCliente = await authService.login();
+    var idCliente = await authService.login(port);
     while (escolha !== '-1') {
         console.log('O que deseja fazer?\n\n');
 
@@ -37,6 +37,7 @@ const main = async () => {
             case '1':
                 var nomeEmpresa = prompt('Digite o nome da empresa: ');
                 var qteAcoes = prompt('Digite o numero de acoes da empresa: ');
+                // insere empresa após recuperar informações do usuário
                 await empresaService.inserirEmpresa(
                     nomeEmpresa,
                     qteAcoes,
@@ -51,6 +52,7 @@ const main = async () => {
                 console.log('MINHAS ACOES');
                 console.log('-----------------------------------------');
                 console.log('CODIGO | VALOR COMPRA');
+                // lista todas as ações que pertencem ao usuário
                 await acaoService.listarAcoesCliente(idCliente).then((res) => {
                     res.data.acoes.forEach((item) => {
                         console.log('-----------------------------------------');
@@ -66,6 +68,7 @@ const main = async () => {
                 console.log('EMPRESAS DISPONIVEIS');
                 console.log('-----------------------------------------');
                 console.log('CODIGO | NOME | VALOR EMPRESA');
+                // lista empresas cadastradas
                 await empresaService.listarEmpresas().then((res) => {
                     res.data.forEach((item) => {
                         console.log('-----------------------------------------');
@@ -83,6 +86,7 @@ const main = async () => {
                 var tempo = prompt(
                     'Qual o tempo que essa ordem vai ficar ativa em minutos?: '
                 );
+                // realiza chamada de compra de ação após recuperar informações do usuário
                 await acaoService.comprarAcao(
                     codigoEmpresaCompra,
                     maxCompra,
@@ -96,6 +100,7 @@ const main = async () => {
                 console.log('MINHAS ACOES');
                 console.log('-----------------------------------------');
                 console.log('COD EMPRESA | CODIGO | VALOR COMPRA');
+                // lista as ações do usuário
                 await acaoService.listarAcoesCliente(idCliente).then((res) => {
                     res.data.acoes.forEach((item) => {
                         console.log('-----------------------------------------');
@@ -114,6 +119,7 @@ const main = async () => {
                 var prazo = prompt(
                     'Qual o tempo que essa ordem vai ficar ativa em minutos?: '
                 );
+                // realiza requisição de vender ação após recuperar dados do usuario
                 await acaoService.venderAcao(
                     codigoAcaoVenda,
                     minVenda,
@@ -127,6 +133,7 @@ const main = async () => {
                 console.log('EMPRESAS DISPONIVEIS');
                 console.log('-----------------------------------------');
                 console.log('CODIGO | NOME | VALOR EMPRESA');
+                // lista empresas registradas
                 await empresaService.listarEmpresas().then((res) => {
                     res.data.forEach((item) => {
                         console.log('-----------------------------------------');
@@ -141,6 +148,8 @@ const main = async () => {
                 var valGanho = prompt();
                 console.log('Qual o valor maximo de perda da empresa?(R$): ');
                 var valPerda = prompt();
+
+                // chamada do endpoint de registrar interesse após recuperar dados do usuário
                 await notificacaoService.registrarInteresse(
                     idCliente,
                     codEmpresa,
@@ -152,11 +161,12 @@ const main = async () => {
                 console.log('-----------------------------------------');
                 console.log('EMPRESAS COM INTERESSE');
                 console.log('-----------------------------------------');
-                console.log('CODIGO | NOME');
+                console.log('CODIGO | VALOR DE GANHO | VALOR DE PERDA');
+                // lista empresas nas quais o cliente tem interesse
                 await empresaService.listarEmpresasInteressado(idCliente).then((res) => {
                     res.data.forEach((item) => {
                         console.log('-----------------------------------------');
-                        console.log(`${item.codigo} | ${item.nome}`);
+                        console.log(`${item.codigoEmpresa} | ${item.valGanho} | ${item.valPerda}`);
                     });
                 });
 
@@ -165,6 +175,8 @@ const main = async () => {
                 var codEmpresaInteresse = prompt(
                     'Qual a empresa desejada (Informar Codigo): '
                 );
+
+                // chamada do endpoint que remove interesse na empresa especificada pelo cliente
                 await notificacaoService.removeInteresse(
                     idCliente,
                     codEmpresaInteresse
@@ -174,11 +186,12 @@ const main = async () => {
                 console.log('-----------------------------------------');
                 console.log('EMPRESAS COM INTERESSE');
                 console.log('-----------------------------------------');
-                console.log('CODIGO | NOME');
+                console.log('CODIGO | VALOR DE GANHO | VALOR DE PERDA');
+                // lista empresas nas quais o cliente tem interesse
                 await empresaService.listarEmpresasInteressado(idCliente).then((res) => {
                     res.data.forEach((item) => {
                         console.log('-----------------------------------------');
-                        console.log(`${item.codigo} | ${item.nome}`);
+                        console.log(`${item.codigoEmpresa} | ${item.valGanho} | ${item.valPerda}`);
                     });
                 });
 
@@ -187,15 +200,21 @@ const main = async () => {
                 break;
             case '8':
                 var valorCotacao = prompt('De quanto sera o aumento?(R$): ');
+
+                // chamada do endpoint de registrar aumento geral nos preços
                 await acaoService.insertCotacaoValorizacao(valorCotacao);
                 break;
             case '9':
                 var valorCotacaoReducao = prompt('De quanto sera a reducao?(R$): ');
+
+                // chamada do endpoint de registrar diminuição geral nos preços
                 await acaoService.insertCotacaoDesvalorizacao(valorCotacaoReducao);
                 break;
             case '10':
                 console.log('-----------------------------------------');
                 console.log('CODIGO | NOME | VALOR EMPRESA');
+
+                // lista todas as empresas registradas
                 await empresaService.listarEmpresas().then((res) => {
                     res.data.forEach((item) => {
                         console.log('-----------------------------------------');
@@ -205,6 +224,7 @@ const main = async () => {
                 console.log('-----------------------------------------');
                 break;
             case '11':
+                // lista mensagens recebidas
                 messages.forEach((m) => {
                     console.log(m);
                 });
@@ -213,7 +233,18 @@ const main = async () => {
                 break;
         }
     }
-    evtSource.close();
 };
-
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.post('/api/mensagem', async (req, res) => {
+    messages = [...messages, req.body.message];
+    return res.status(201).send({
+        success: 'true',
+        message: 'message added successfully'
+    });
+});
+app.listen(port, () => {
+    console.log(`server running on port ${port}`);
+});
 main();
