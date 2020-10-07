@@ -2,8 +2,7 @@ const authService = require('./service/authService.js');
 const empresaService = require('./service/empresaService.js');
 const acaoService = require('./service/acaoService.js');
 const notificacaoService = require('./service/notificacaoService.js');
-const express = require('express');
-const bodyParser = require('body-parser');
+
 var EventSource = require('eventsource');
 
 const port = 1234;
@@ -13,6 +12,10 @@ const prompt = require('prompt-sync')();
 var messages = [];
 
 const main = async () => {
+    const evtSource = new EventSource('http://localhost:8080/sd-bolsa-api/restapi/notificacao');
+    evtSource.onmessage = function (event) {
+        messages = [...messages, event.data];
+    };
     var escolha = '0';
 
     var idCliente = await authService.login(port);
@@ -234,17 +237,4 @@ const main = async () => {
         }
     }
 };
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.post('/api/mensagem', async (req, res) => {
-    messages = [...messages, req.body.message];
-    return res.status(201).send({
-        success: 'true',
-        message: 'message added successfully'
-    });
-});
-app.listen(port, () => {
-    console.log(`server running on port ${port}`);
-});
 main();
