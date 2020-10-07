@@ -238,7 +238,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.post('/api/mensagem', async (req, res) => {
-    messages = [...messages, req.body.message];
+    // messages = [...messages, req.body.message];
+    console.log(req);
     return res.status(201).send({
         success: 'true',
         message: 'message added successfully'

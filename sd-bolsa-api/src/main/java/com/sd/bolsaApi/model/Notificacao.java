@@ -7,18 +7,18 @@ import com.sd.bolsaApi.enums.TipoNotificacao;
 public class Notificacao {
 	
 	private int tipoNotificao;
-	private String mensagemNotificacao;
+	private String message;
 	
 	public Notificacao() {	}
 	
 	public Notificacao(int tipoNotificao, String codigoEmpresa) {
 		this.tipoNotificao = tipoNotificao;
-		this.mensagemNotificacao = "["+codigoEmpresa+"]: "+ TipoNotificacao.findDescricaoByCodigo(tipoNotificao);
+		this.message = "["+codigoEmpresa+"]: "+ TipoNotificacao.findDescricaoByCodigo(tipoNotificao);
 	}
 	
 	public Notificacao(int tipoNotificao, UUID idCliente) {
 		this.tipoNotificao = tipoNotificao;
-		this.mensagemNotificacao = "["+idCliente.toString()+"]: "+ TipoNotificacao.findDescricaoByCodigo(tipoNotificao);
+		this.message = "["+idCliente.toString()+"]: "+ TipoNotificacao.findDescricaoByCodigo(tipoNotificao);
 	}
 
 	public int getTipoNotificao() {
@@ -26,6 +26,6 @@ public class Notificacao {
 	}
 
 	public String getMensagemNotificacao() {
-		return mensagemNotificacao;
+		return message;
 	}
 }
