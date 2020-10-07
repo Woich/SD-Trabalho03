@@ -14,7 +14,10 @@ var messages = [];
 const main = async () => {
     const evtSource = new EventSource('http://localhost:8080/sd-bolsa-api/restapi/notificacao');
     evtSource.onmessage = function (event) {
-        messages = [...messages, event.data];
+        var res = JSON.parse(event.data);
+        if (res.idCliente === this.idCliente) {
+            messages = [...messages, res.message];
+        }
     };
     var escolha = '0';
 
